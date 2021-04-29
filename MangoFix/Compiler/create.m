@@ -43,7 +43,8 @@ void mf_open_string_literal_buf(){
 void mf_append_string_literal(int letter){
 	if (st_string_literal_buffer_size >= st_string_literal_buffer_alloc_size) {
 		st_string_literal_buffer_alloc_size +=  STRING_ALLOC_SIZE;
-		void *new_pointer = realloc(st_string_literal_buffer, st_string_literal_buffer_alloc_size);
+		char *new_pointer = calloc(st_string_literal_buffer_alloc_size,1);
+        memcpy(new_pointer, st_string_literal_buffer, st_string_literal_buffer_size);
 		free(st_string_literal_buffer);
 		st_string_literal_buffer = new_pointer;
 	}
@@ -63,7 +64,7 @@ void mf_rest_string_literal_buffer(void){
 const char *mf_end_string_literal(){
 	mf_append_string_literal('\0');
 	size_t strLen = strlen(st_string_literal_buffer);
-	char *str = malloc(strLen + 1);
+	char *str = calloc(strLen + 1, 1);
 	strcpy(str, st_string_literal_buffer);
 	mf_rest_string_literal_buffer();
 	return str;
@@ -148,14 +149,14 @@ MFDicEntry *mf_create_dic_entry(MFExpression *keyExpr, MFExpression *valueExpr){
 
 
 MFExpression *mf_create_expression(MFExpressionKind kind){
-	Class clazz = mf_expression_class_of_kind(kind);
-	MFExpression *expr = [[clazz alloc] init];
-    expr.lineNumber = mf_get_current_compile_util().currentLineNumber;
-	expr.expressionKind = kind;
-    if (mf_get_current_compile_util().currentClassDefinition) {
-        expr.currentClassName = mf_get_current_compile_util().currentClassDefinition.name;
-    }
-	return expr;
+        Class clazz = mf_expression_class_of_kind(kind);
+        MFExpression *expr = [[clazz alloc] init];
+        expr.lineNumber = mf_get_current_compile_util().currentLineNumber;
+        expr.expressionKind = kind;
+        if (mf_get_current_compile_util().currentClassDefinition) {
+            expr.currentClassName = mf_get_current_compile_util().currentClassDefinition.name;
+        }
+        return expr;
 }
 
 

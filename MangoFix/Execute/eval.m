@@ -692,13 +692,13 @@ static void eval_block_expression(MFInterpreter *inter, MFScopeChain *outScope, 
 	
 	manBlock.inter = inter;
 	
-	const char *typeEncoding = [manBlock.func.returnTypeSpecifier typeEncoding];
-	typeEncoding = mf_str_append(typeEncoding, "@?");
+	NSMutableString *typeEncoding = [NSMutableString stringWithUTF8String:[manBlock.func.returnTypeSpecifier typeEncoding]];
+    [typeEncoding appendString:@"@?"];
 	for (MFParameter *param in manBlock.func.params) {
 		const char *paramTypeEncoding = [param.type typeEncoding];
-		typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
+		[typeEncoding appendString:@(paramTypeEncoding)];
 	}
-	manBlock.typeEncoding = typeEncoding;
+	manBlock.typeEncoding = strdup(typeEncoding.UTF8String);
 	__autoreleasing id ocBlock = [manBlock ocBlock];
 	value.objectValue = ocBlock;
     CFRelease((__bridge void *)ocBlock);
@@ -1579,7 +1579,7 @@ static void eval_member_expression(MFInterpreter *inter, MFScopeChain *scope, MF
     }
     
 	eval_expression(inter, scope, expr.expr);
-	MFValue *obj = [inter.stack pop];
+	__autoreleasing MFValue *obj = [inter.stack pop];
     MFValue *resultValue;
 	if (obj.type.typeKind == MF_TYPE_STRUCT) {
 		MFStructDeclareTable *table = [MFStructDeclareTable shareInstance];
