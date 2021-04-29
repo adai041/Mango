@@ -15,7 +15,27 @@
 
 static ffi_type *_ffi_type_with_type_encoding(NSString *typeEncoding){
 	char *code = (char *)typeEncoding.UTF8String;
-	switch (code[0]) {
+    if (!code || strlen(code) == 0) return NULL;
+    
+    bool prefix = true;
+    while (prefix) {
+        switch (*code) {
+            case 'r':
+            case 'n':
+            case 'N':
+            case 'o':
+            case 'O':
+            case 'R':
+            case 'V':
+            {
+                code++;
+            } break;
+            default: { prefix = false; } break;
+        }
+    }
+    if (strlen(code) == 0) return NULL;
+    
+	switch (*code) {
 		case 'v':
 			return &ffi_type_void;
 		case 'c':
